@@ -4,7 +4,7 @@ import sys
 from genericpath import isdir
 from os import listdir
 from os.path import isfile, isdir, join
-
+import magic
 
 #CONSTANTS:
 RECURSION = False
@@ -21,13 +21,13 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def warn(statement):
-    print("WARNING: \t" + statement)
+    print(bcolors.WARNING + "WARNING: \t" + statement + bcolors.ENDC)
 
 def fail(statement):
-    print("FAILURE: \t"+ statement)
+    print(bcolors.FAIL + "FAILURE: \t"+ statement + bcolors.ENDC)
 
 def okay(statement):
-    print("SUCCESS: \t" + statement)
+    print(bcolors.OKGREEN + "SUCCESS: \t" + statement + bcolors.ENDC)
 
 
 ################################################################################
@@ -35,8 +35,8 @@ def okay(statement):
 ################################################################################
 class sig:
     def __init__(self, magichex, offsethex, description="[none]"):
-        self.magicbytes = magichex.replace(" ","").lower()
-        self.offsethex = int(str(offsethex), 16)
+        self.magicbytes = magichex.lower().split(" ")
+        self.offset = int(str(offsethex), 16)
         self.text = description
 
 extLookUp = {}
@@ -104,6 +104,7 @@ addsig("jpg", "FF D8 FF E1", 0, "JPEG file")
 addsig("jpeg", "FF D8 FF E1", 0, "JPEG file")
 
 
+
 ################################################################################
 #                               END SIGNATURE LIST                             #
 ################################################################################
@@ -114,12 +115,15 @@ def crawlpath(dirpath):
     #check each file
 
     for f in fileshere:
-        if checkbytes(join(dirpath, f)) == "MATCH":
-            okay(join(dirpath,f))
-        elif checkbytes(join(dirpath,f)) == "MISMATCH":
-            fail(join(dirpath,f))
+        fpath = join(dirpath, f)
+        result = checkbytes(fpath)
+        if result == "MATCH":
+            okay(fpath)
+        elif result == "MISMATCH":
+            fail(fpath)
+            print(bcolors.FAIL + "DETECTED: \t" + magic.from_file(fpath) + bcolors.ENDC)
         else:
-            warn(join(dirpath,f))  
+            warn(fpath)  
     #list all directories
     if RECURSION:
         dirshere = [d for d in listdir(dirpath) if isdir(join(dirpath, d))]
@@ -133,14 +137,34 @@ def checkbytes(filepath):
     
     # get its extension
     ext = filepath.split(".")[-1].lower()
-    if CAUTIOUS and not(ext in extLookUp.keys()):
+    if not(ext in extLookUp.keys()):
         return "UNKNOWN"
-    # open the file in binary read mode
-    f = open(filepath, "rb")
-    f.close()
 
+    for asig in extLookUp[ext]:
+        if(checksig(filepath, asig)):
+            return "MATCH"
+    
     #return agreement
-    return "MATCH" 
+    return "MISMATCH" 
+
+def checksig(filepath, signature):
+    f = open(filepath, "rb")
+    f.seek(signature.offset)
+    siglen = len(signature.magicbytes)
+
+    #Read bytes
+    buf = bytearray(f.read(siglen))
+    
+    #Check signature
+    for i in range(siglen):
+        if signature.magicbytes[i] == "??":
+            continue
+        if int(str(signature.magicbytes[i]), 16) == buf[i]:
+            f.close()
+            return False
+    f.close()
+    return True
+    
 #Main
 if __name__ == "__main__":
     if len(sys.argv) == 1:
