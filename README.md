@@ -1,10 +1,8 @@
 # MagiCheck
 Magic Byte Checker utility. Helps prevent phishing attacks!
 
-This lightweight utility measure was developed over the course of a single day.
-
 USAGE:
-python3 [options] [target directory or file]
+python3 magicheck.py [options] [target directory or file]
 
 The program will explore one's computer for files which do not match their
 extensions, starting with the target directory or file. If the target is a

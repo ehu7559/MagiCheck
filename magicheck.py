@@ -19,15 +19,11 @@ HACKERLOOK = False
 TIMEDELAY = 0.25
 
 class bcolors:
-    HEADER = '\033[95m'
     OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 def debugstatement(statement):
     if DEBUG:
@@ -68,6 +64,7 @@ def addsig(ext, magichex, offsethex=0, label="[none]"):
         extLookUp[ext.lower()] = []
     extLookUp[ext.lower()].append(sig(magichex,offsethex,label))
 
+#TAKEN FROM WIKIPEDIA, WITH THANKS.
 addsig("", "23 21", 0, "Script or data to be passed to the program following the shebang (#!)")
 addsig("pcap", "D4 C3 B2 A1", 0, "Libpcap File Format (little endian)")
 addsig("pcap", "A1 B2 C3 D4", 0, "Libpcap File Format (big endian)")
@@ -130,15 +127,7 @@ addsig("eml", "53 75 62 6A 65 63 74 3A", 0, "Email Message file, seen in NSA Cod
 addsig("pdf", "25 50 44 46 2D", 0, "PDF Document")
 
 #Wildcard Signatures
-wildcards = []
-wildcards.append("txt")
-wildcards.append("c")
-wildcards.append("py")
-wildcards.append("pyo")
-wildcards.append("sh")
-wildcards.append("java")
-wildcards.append("md")
-
+wildcards = ['txt','c','py','pyo','sh','java','md','cpp']
 
 ################################################################################
 #                               END SIGNATURE LIST                             #
