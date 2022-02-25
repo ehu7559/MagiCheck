@@ -1,6 +1,7 @@
 #!/bin/usr/python3
 
-
+import argparse
+import pathlib
 import sys
 from os import listdir
 from os.path import isfile, isdir, join
@@ -220,22 +221,31 @@ def checksig(filepath, signature):
     
 #Main
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print("INSUFFICIENT ARGUMENTS")
-    else:
-        if "-r" in sys.argv:
-            RECURSION = True
-        if "--no-warning" in sys.argv:
-            NO_WARN = True
-        if "--no-failure" in sys.argv:
-            NO_FAIL = True
-        if "-q" in sys.argv or "--quiet" in sys.argv:
-            NO_OKAY = True
-            NO_WARN = True
-        if "-v" in sys.argv or "--verbose" in sys.argv:
-            NO_OKAY = False
-        if "--debug" in sys.argv:
-            DEBUG = True
-        if "--1337h4x0rz" in sys.argv:
-            HACKERLOOK = True
-        crawl(sys.argv[-1])
+    parser = argparse.ArgumentParser(description="Magic Byte Checker utility. Helps prevent phishing attacks!")
+    parser.add_argument("filepath", type=pathlib.Path, help="The path to the file or directory")
+    parser.add_argument("-r", "--recursive", action="store_true", help="Desired. Will recursively scan subdirectories.")
+    parser.add_argument("--no-warning", action="store_true", help="Suppresses \"WARNING\" type messages")
+    parser.add_argument("--no-failure", action="store_true", help="Suppresses \"FAILURE\" messages. Rather pointless, but who cares?")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppresses \"SUCCESS\" and \"WARNING\" messages")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Shows \"SUCCESS\" messages")
+    parser.add_argument("--debug", action="store_true", help="Shows debug statements. Not useful to users, who should use the verbose option instead.")
+    parser.add_argument("--1337h4x0rz", dest="hackerlook", action="store_true", help="\"Hacker Mode\", with a short delay between prints to look cool!")
+    args = parser.parse_args()
+
+    if args.recursive:
+        RECURSION = True
+    if args.no_warning:
+        NO_WARN = True
+    if args.no_failure:
+        NO_FAIL = True
+    if args.quiet:
+        NO_OKAY = True
+        NO_WARN = True
+    if args.verbose:
+        NO_OKAY = False
+    if args.debug:
+        DEBUG = True
+    if args.hackerlook:
+        HACKERLOOK = True
+
+    crawl(args.filepath)
