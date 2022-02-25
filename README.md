@@ -2,7 +2,7 @@
 Magic Byte Checker utility. Helps prevent phishing attacks!
 
 USAGE:
-python3 magicheck.py [options] [target directory or file]
+`python3 magicheck.py [options] [target directory or file]`
 
 The program will explore one's computer for files which do not match their
 extensions, starting with the target directory or file. If the target is a
@@ -10,7 +10,7 @@ directory, the program will check all files within the directory. If the target
 is a file, it will only check that file. 
 
 OPTIONS:
-
+--------------------------------------------------------------------------------
 -r              Recursion Desired. Will recursively scan subdirectories.
 
 --no-warning    Suppresses "WARNING" type messages
@@ -27,8 +27,15 @@ verbose option instead.
 -1137h4x0rz     "Hacker Mode", with a short delay between prints to look cool!
 
 DEPENDENCIES:
+--------------------------------------------------------------------------------
 This utility uses the python-magic library. It can be removed with little to no
 impact on core functionality.
+
+KNOWN ISSUES:
+--------------------------------------------------------------------------------
+The file signature for `.plist` files ("Binary Property List file") seems to not
+detect some .plist files encountered during testing. The magic library
+identifies them as `XML 1.0 document, ASCII text`.
 
 PLANNED UPDATES:
 - Finish adding signatures from Wikipedia's list

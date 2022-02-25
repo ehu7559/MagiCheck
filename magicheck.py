@@ -97,7 +97,7 @@ addsig("z", "1F A0", 0, "Compressed file (often tar zip) using LZH algorithm")
 addsig("tar.z", "1F A0", 0, "Compressed file (often tar zip) using LZH algorithm")
 addsig("bac", "42 41 43 4B 4D 49 4B 45 44 49 53 4B", 0, "AmiBack Amiga Backup data file")
 addsig("idx", "49 4E 44 58", 0, "AmiBack Amiga Backup index file")
-addsig("plist", "62 70 6C 69 73 74", 0, "Binary Property List file")
+addsig("plist", "62 70 6C 69 73 74", 0, "Binary Property List file")    #Seems to be an issue. Magic detects plists as XML files with ASCII text.
 addsig("bz2", "42 5A 68", 0, "Compressed file using Bzip2 algorithm")
 addsig("gif", "47 49 46 38 37 61", 0, "Graphics Interchange Format, 87a")
 addsig("gif", "47 49 46 38 39 61", 0, "Graphics Interchange Format, 89a")
