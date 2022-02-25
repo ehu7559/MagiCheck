@@ -29,7 +29,8 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def debugstatement(statement):
-    print(bcolors.OKBLUE + "DEBUG: \t" + statement + bcolors.ENDC)
+    if DEBUG:
+        print(bcolors.OKBLUE + "DEBUG: \t" + statement + bcolors.ENDC)
 
 def warn(statement):
     if HACKERLOOK:
@@ -134,6 +135,8 @@ wildcards.append("c")
 wildcards.append("py")
 wildcards.append("pyo")
 wildcards.append("sh")
+wildcards.append("java")
+wildcards.append("md")
 
 
 ################################################################################
@@ -231,6 +234,8 @@ if __name__ == "__main__":
             NO_WARN = True
         if "-v" in sys.argv or "--verbose" in sys.argv:
             NO_OKAY = False
+        if "--debug" in sys.argv:
+            DEBUG = True
         if "--1337h4x0rz" in sys.argv:
             HACKERLOOK = True
         crawl(sys.argv[-1])

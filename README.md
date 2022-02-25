@@ -4,12 +4,15 @@ Magic Byte Checker utility. Helps prevent phishing attacks!
 This lightweight utility measure was developed over the course of a single day.
 
 USAGE:
-python3 [options] [directory]
+python3 [options] [target directory or file]
 
 The program will explore one's computer for files which do not match their
-extensions.
+extensions, starting with the target directory or file. If the target is a
+directory, the program will check all files within the directory. If the target
+is a file, it will only check that file. 
 
 OPTIONS:
+
 -r              Recursion Desired. Will recursively scan subdirectories.
 
 --no-warning    Suppresses "WARNING" type messages
@@ -19,6 +22,9 @@ OPTIONS:
 -q or --quiet   Suppresses "SUCCESS" and "WARNING" messages
 
 -v or --verbose Shows "SUCCESS" messages
+
+--debug         Shows debug statements. Not useful to users, who should use the
+verbose option instead.
 
 -1137h4x0rz     "Hacker Mode", with a short delay between prints to look cool!
 
