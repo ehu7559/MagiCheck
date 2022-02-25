@@ -2,7 +2,6 @@
 
 import argparse
 import pathlib
-import sys
 from os import listdir
 from os.path import isfile, isdir, join
 from magic import from_file
@@ -133,9 +132,11 @@ wildcards = ['txt','c','py','pyo','sh','java','md','cpp']
 #                               END SIGNATURE LIST                             #
 ################################################################################
 
-def crawl(pathstr):
+def crawl(pathobj):
+    pathstr = str(pathobj)
     #Directory
     if isdir(pathstr):
+        debugstatement("Crawling directory: \""+pathstr+"\"")
         fileshere = [f for f in listdir(pathstr) if isfile(join(pathstr, f))]
         for f in fileshere:
             fpath = join(pathstr, f)
@@ -148,6 +149,7 @@ def crawl(pathstr):
             
     #File
     elif isfile(pathstr):
+        debugstatement("Crawling file: \""+pathstr+"\"")
         result = checkbytes(pathstr)
         if result == "MATCH":
             okay(pathstr)
@@ -189,14 +191,15 @@ def checkbytes(filepath):
     return "MISMATCH" 
 
 def checksig(filepath, signature):
+    debugstatement("Checking file \""+filepath+"\" for signature \""+" ".join(signature.magicbytes) + "\"")
     f = open(filepath, "rb")
     f.seek(signature.offset)
     siglen = len(signature.magicbytes)
-
     #Read bytes
     buf = bytearray(f.read(siglen))
     
     if len(buf) < siglen:
+        debugstatement("Signature mismatched due to insufficient file size")
         return False
     #Check signature
     for i in range(siglen):
@@ -215,8 +218,8 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--recursive", action="store_true", help="Desired. Will recursively scan subdirectories.")
     parser.add_argument("--no-warning", action="store_true", help="Suppresses \"WARNING\" type messages")
     parser.add_argument("--no-failure", action="store_true", help="Suppresses \"FAILURE\" messages. Rather pointless, but who cares?")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppresses \"SUCCESS\" and \"WARNING\" messages")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Shows \"SUCCESS\" messages")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppresses \"MATCHED\" and \"WARNING\" messages")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Shows \"MATCHED\" messages")
     parser.add_argument("--debug", action="store_true", help="Shows debug statements. Not useful to users, who should use the verbose option instead.")
     parser.add_argument("--1337h4x0rz", dest="hackerlook", action="store_true", help="\"Hacker Mode\", with a short delay between prints to look cool!")
     args = parser.parse_args()
