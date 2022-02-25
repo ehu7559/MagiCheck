@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #MAGIC BYTE CHECKER
-#Lightweight phishing provention
+#Lightweight phishing prevention
 import sys
 from os import listdir
 from os.path import isfile, isdir, join
@@ -14,8 +14,10 @@ CAUTIOUS = False
 NO_WARN = False
 NO_OKAY = True
 NO_FAIL = False
+
 HACKERLOOK = False
 TIMEDELAY = 0.25
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -124,6 +126,7 @@ addsig("jpeg", "FF D8 FF E1", 0, "JPEG file")
 ################################################################################
 #                               END SIGNATURE LIST                             #
 ################################################################################
+
 def crawlpath(dirpath):
     
     #list all files
