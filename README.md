@@ -11,10 +11,15 @@ extensions.
 
 OPTIONS:
 -r              Recursion Desired. Will recursively scan subdirectories.
+
 --no-warning    Suppresses "WARNING" type messages
+
 --no-failure    Suppresses "FAILURE" messages. Rather pointless, but who cares?
+
 -q or --quiet   Suppresses "SUCCESS" and "WARNING" messages
+
 -v or --verbose Shows "SUCCESS" messages
+
 -1137h4x0rz     "Hacker Mode", with a short delay between prints to look cool!
 
 DEPENDENCIES:
