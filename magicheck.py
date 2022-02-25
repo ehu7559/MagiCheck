@@ -1,7 +1,6 @@
-#!/usr/bin/python3
+#!/bin/usr/python3
 
-#MAGIC BYTE CHECKER
-#Lightweight phishing prevention
+
 import sys
 from os import listdir
 from os.path import isfile, isdir, join
@@ -14,7 +13,7 @@ CAUTIOUS = False
 NO_WARN = False
 NO_OKAY = True
 NO_FAIL = False
-
+DEBUG = False
 HACKERLOOK = False
 TIMEDELAY = 0.25
 
@@ -28,6 +27,9 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+def debugstatement(statement):
+    print(bcolors.OKBLUE + "DEBUG: \t" + statement + bcolors.ENDC)
 
 def warn(statement):
     if HACKERLOOK:
@@ -45,7 +47,7 @@ def okay(statement):
     if HACKERLOOK:
         sleep(TIMEDELAY)
     if not NO_OKAY:
-        print(bcolors.OKGREEN + "SUCCESS: \t" + statement + bcolors.ENDC)
+        print(bcolors.OKGREEN + "MATCHED: \t" + statement + bcolors.ENDC)
 
 
 ################################################################################
@@ -121,41 +123,65 @@ addsig("jpeg", "FF D8 FF EE", 0, "JPEG file")
 addsig("jpg", "FF D8 FF E1", 0, "JPEG file")
 addsig("jpeg", "FF D8 FF E1", 0, "JPEG file")
 
+addsig("eml", "52 65 63 65 69 76 65 64 3A", 0, "Email Message var5")
+addsig("eml", "53 75 62 6A 65 63 74 3A", 0, "Email Message file, seen in NSA Codebreaker 2021 Challenge")
+addsig("pdf", "25 50 44 46 2D", 0, "PDF Document")
+
+#Wildcard Signatures
+wildcards = []
+wildcards.append("txt")
+wildcards.append("c")
+wildcards.append("py")
+wildcards.append("pyo")
+wildcards.append("sh")
 
 
 ################################################################################
 #                               END SIGNATURE LIST                             #
 ################################################################################
 
-def crawlpath(dirpath):
-    
-    #list all files
-    fileshere = [f for f in listdir(dirpath) if isfile(join(dirpath, f))]
-    #check each file
-
-    for f in fileshere:
-        fpath = join(dirpath, f)
-        result = checkbytes(fpath)
+def crawl(pathstr):
+    #Directory
+    if isdir(pathstr):
+        fileshere = [f for f in listdir(pathstr) if isfile(join(pathstr, f))]
+        for f in fileshere:
+            fpath = join(pathstr, f)
+            crawl(fpath)
+        if RECURSION:
+            dirshere = [d for d in listdir(pathstr) if isdir(join(pathstr, d))]
+            #check each directory
+            for d in dirshere:
+                crawl(join(pathstr,d))
+            
+    #File
+    elif isfile(pathstr):
+        result = checkbytes(pathstr)
         if result == "MATCH":
-            okay(fpath)
+            okay(pathstr)
         elif result == "MISMATCH":
-            fail(fpath)
-            print(bcolors.FAIL + "DETECTED: \t" + from_file(fpath) + bcolors.ENDC)
+            fail(pathstr)
+            print(bcolors.FAIL + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC)
         else:
-            warn(fpath)  
-    #list all directories
-    if RECURSION:
-        dirshere = [d for d in listdir(dirpath) if isdir(join(dirpath, d))]
-        #check each directory
-        for d in dirshere:
-            crawlpath(join(dirpath,d))
+            warn(pathstr)
+    #Else:
+    else:
+        fail("Target \"" + pathstr + "\" is neither a file nor a directory")
     return
 
+
 def checkbytes(filepath):
+    debugstatement("Checking " + filepath)
     '''checks the magic bytes of the file for agreements with its extension'''
     
     # get its extension
-    ext = filepath.split(".")[-1].lower()
+    just_file_name = filepath.split("/")[-1].lower()
+    ext = ""
+    if "." in just_file_name:
+        ext = just_file_name.split(".")[-1].lower()
+    
+    if ext in wildcards:
+        return "MATCH"
+
     if not(ext in extLookUp.keys()):
         return "UNKNOWN"
 
@@ -177,6 +203,8 @@ def checksig(filepath, signature):
     #Read bytes
     buf = bytearray(f.read(siglen))
     
+    if len(buf) < siglen:
+        return False
     #Check signature
     for i in range(siglen):
         if signature.magicbytes[i] == "??":
@@ -205,4 +233,4 @@ if __name__ == "__main__":
             NO_OKAY = False
         if "--1337h4x0rz" in sys.argv:
             HACKERLOOK = True
-        crawlpath(sys.argv[-1])
+        crawl(sys.argv[-1])
