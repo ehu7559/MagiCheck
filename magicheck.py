@@ -1,14 +1,21 @@
+#!/usr/bin/python3
+
 #MAGIC BYTE CHECKER
 #Lightweight phishing provention
 import sys
-from genericpath import isdir
 from os import listdir
 from os.path import isfile, isdir, join
-import magic
+from magic import from_file
+from time import sleep
 
 #CONSTANTS:
 RECURSION = False
-CAUTIOUS = True
+CAUTIOUS = False
+NO_WARN = False
+NO_OKAY = True
+NO_FAIL = False
+HACKERLOOK = False
+TIMEDELAY = 0.25
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -21,13 +28,22 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def warn(statement):
-    print(bcolors.WARNING + "WARNING: \t" + statement + bcolors.ENDC)
+    if HACKERLOOK:
+        sleep(TIMEDELAY)
+    if not NO_WARN:
+        print(bcolors.WARNING + "WARNING: \t" + statement + bcolors.ENDC)
 
 def fail(statement):
-    print(bcolors.FAIL + "FAILURE: \t"+ statement + bcolors.ENDC)
+    if HACKERLOOK:
+        sleep(TIMEDELAY)
+    if not NO_FAIL:
+        print(bcolors.FAIL + "FAILURE: \t"+ statement + bcolors.ENDC)
 
 def okay(statement):
-    print(bcolors.OKGREEN + "SUCCESS: \t" + statement + bcolors.ENDC)
+    if HACKERLOOK:
+        sleep(TIMEDELAY)
+    if not NO_OKAY:
+        print(bcolors.OKGREEN + "SUCCESS: \t" + statement + bcolors.ENDC)
 
 
 ################################################################################
@@ -121,7 +137,7 @@ def crawlpath(dirpath):
             okay(fpath)
         elif result == "MISMATCH":
             fail(fpath)
-            print(bcolors.FAIL + "DETECTED: \t" + magic.from_file(fpath) + bcolors.ENDC)
+            print(bcolors.FAIL + "DETECTED: \t" + from_file(fpath) + bcolors.ENDC)
         else:
             warn(fpath)  
     #list all directories
@@ -144,6 +160,9 @@ def checkbytes(filepath):
         if(checksig(filepath, asig)):
             return "MATCH"
     
+    if (not CAUTIOUS) and (ext == ""):
+        return "UNKNOWN"
+
     #return agreement
     return "MISMATCH" 
 
@@ -159,7 +178,7 @@ def checksig(filepath, signature):
     for i in range(siglen):
         if signature.magicbytes[i] == "??":
             continue
-        if int(str(signature.magicbytes[i]), 16) == buf[i]:
+        if not int(str(signature.magicbytes[i]), 16) == buf[i]:
             f.close()
             return False
     f.close()
@@ -168,8 +187,19 @@ def checksig(filepath, signature):
 #Main
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        pass
+        print("INSUFFICIENT ARGUMENTS")
     else:
         if "-r" in sys.argv:
             RECURSION = True
+        if "--no-warning" in sys.argv:
+            NO_WARN = True
+        if "--no-failure" in sys.argv:
+            NO_FAIL = True
+        if "-q" in sys.argv or "--quiet" in sys.argv:
+            NO_OKAY = True
+            NO_WARN = True
+        if "-v" in sys.argv or "--verbose" in sys.argv:
+            NO_OKAY = False
+        if "--1337h4x0rz" in sys.argv:
+            HACKERLOOK = True
         crawlpath(sys.argv[-1])
