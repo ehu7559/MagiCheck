@@ -126,7 +126,7 @@ addsig("eml", "53 75 62 6A 65 63 74 3A", 0, "Email Message file, seen in NSA Cod
 addsig("pdf", "25 50 44 46 2D", 0, "PDF Document")
 
 #Wildcard Signatures
-wildcards = ['txt','c','py','pyo','sh','java','md','cpp']
+wildcards = ['txt','c','py','pyo','sh','java','md','cpp','lua']
 
 ################################################################################
 #                               END SIGNATURE LIST                             #
@@ -152,12 +152,18 @@ def crawl(pathobj):
         debugstatement("Crawling file: \""+pathstr+"\"")
         result = checkbytes(pathstr)
         if result == "MATCH":
-            okay(pathstr)
+            if not NO_OKAY:
+                okay(pathstr)
         elif result == "MISMATCH":
-            fail(pathstr)
-            print(bcolors.FAIL + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC)
+            if not NO_FAIL:
+                fail(pathstr)
+                print(bcolors.FAIL + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC + "\n")
         else:
-            warn(pathstr)
+            if not NO_WARN:
+                warn(pathstr)
+                if CAUTIOUS:
+                    print(bcolors.WARNING + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC + "\n")
+
     #Else:
     else:
         fail("Target \"" + pathstr + "\" is neither a file nor a directory")
@@ -174,6 +180,9 @@ def checkbytes(filepath):
     if "." in just_file_name:
         ext = just_file_name.split(".")[-1].lower()
     
+    if ext == just_file_name.replace(".", ""):
+        ext="" #Extension cannot be entire file name. This helps with files beginning with .
+
     if ext in wildcards:
         return "MATCH"
 
@@ -222,6 +231,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="Shows \"MATCHED\" messages")
     parser.add_argument("--debug", action="store_true", help="Shows debug statements. Not useful to users, who should use the verbose option instead.")
     parser.add_argument("--1337h4x0rz", dest="hackerlook", action="store_true", help="\"Hacker Mode\", with a short delay between prints to look cool!")
+    parser.add_argument("--cautious", action="store_true",help="Performs signature/content identifications on unknown file extensions")
     args = parser.parse_args()
 
     if args.recursive:
@@ -239,5 +249,6 @@ if __name__ == "__main__":
         DEBUG = True
     if args.hackerlook:
         HACKERLOOK = True
-
+    if args.cautious:
+        CAUTIOUS = True
     crawl(args.filepath)
