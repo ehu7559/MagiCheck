@@ -184,6 +184,8 @@ def checkbytes(filepath):
         ext="" #Extension cannot be entire file name. This helps with files beginning with .
 
     if ext in wildcards:
+        if CAUTIOUS:
+            return "UNKNOWN"
         return "MATCH"
 
     if not(ext in extLookUp.keys()):
