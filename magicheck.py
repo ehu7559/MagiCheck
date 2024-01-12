@@ -169,6 +169,48 @@ def crawl(pathobj):
         fail("Target \"" + pathstr + "\" is neither a file nor a directory")
     return
 
+def better_crawl(pathobj):
+    '''Better  crawl that doesn't use recursion.'''
+    queue = [str(pathobj)]
+
+    #Crawl
+    while queue:
+        pathstr = queue.pop()
+
+        #Directory
+        if isdir(pathstr):
+            debugstatement("Crawling directory: \""+pathstr+"\"")
+            fileshere = [f for f in listdir(pathstr) if isfile(join(pathstr, f))]
+            if RECURSION:
+                dirshere = [d for d in listdir(pathstr) if isdir(join(pathstr, d))]
+                #check each directory
+                for d in dirshere:
+                    queue.append(join(pathstr,d))
+            for f in fileshere:
+                fpath = join(pathstr, f)
+                queue.append(fpath)
+                
+        #File
+        elif isfile(pathstr):
+            debugstatement("Crawling file: \""+pathstr+"\"")
+            result = checkbytes(pathstr)
+            if result == "MATCH":
+                if not NO_OKAY:
+                    okay(pathstr)
+            elif result == "MISMATCH":
+                if not NO_FAIL:
+                    fail(pathstr)
+                    print(bcolors.FAIL + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC + "\n")
+            else:
+                if not NO_WARN:
+                    warn(pathstr)
+                    if CAUTIOUS:
+                        print(bcolors.WARNING + "DETECTED: \t" + from_file(pathstr) + bcolors.ENDC + "\n")
+
+        #Else:
+        else:
+            fail("Target \"" + pathstr + "\" is neither a file nor a directory")
+    return
 
 def checkbytes(filepath):
     debugstatement("Checking " + filepath)
@@ -226,7 +268,7 @@ def checksig(filepath, signature):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Magic Byte Checker utility. Helps prevent phishing attacks!")
     parser.add_argument("filepath", type=pathlib.Path, help="The path to the file or directory")
-    parser.add_argument("-r", "--recursive", action="store_true", help="Desired. Will recursively scan subdirectories.")
+    parser.add_argument("-r", "--recursive", action="store_true", help="Recursion desired. (Will recursively scan subdirectories)")
     parser.add_argument("--no-warning", action="store_true", help="Suppresses \"WARNING\" type messages")
     parser.add_argument("--no-failure", action="store_true", help="Suppresses \"FAILURE\" messages. Rather pointless, but who cares?")
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppresses \"MATCHED\" and \"WARNING\" messages")
@@ -253,4 +295,4 @@ if __name__ == "__main__":
         HACKERLOOK = True
     if args.cautious:
         CAUTIOUS = True
-    crawl(args.filepath)
+    better_crawl(args.filepath)
